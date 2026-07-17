@@ -3,6 +3,7 @@ import { CriticService } from './critic.service.js';
 import { LLMCriticProvider } from './providers/llm.provider.js';
 import { MockCriticProvider } from './providers/mock.provider.js';
 import { AIModule } from '../../core/ai/ai.module.js';
+import { CriticTools } from './critic.tools.js';
 
 @Module({
   name: 'critic',
@@ -13,6 +14,7 @@ import { AIModule } from '../../core/ai/ai.module.js';
     LLMCriticProvider,
     MockCriticProvider
   ],
+  controllers: [CriticTools],
   exports: [
     CriticService,
     LLMCriticProvider,

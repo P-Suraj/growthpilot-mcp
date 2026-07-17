@@ -7,7 +7,7 @@ import { DraftService } from '../draft/draft.service.js';
 import { CriticService } from '../critic/critic.service.js';
 import { ResearchResult, QualificationScore, Draft, Critique } from '../shared/models.js';
 
-@Controller('campaign')
+@Controller()
 export class CampaignController {
   constructor(
     private readonly planner: PlannerService,
@@ -19,64 +19,78 @@ export class CampaignController {
   ) {}
 
   @Tool({
-    name: 'run_campaign',
-    description: 'Executes the entire GrowthPilot lead generation campaign pipeline for a given user goal.',
+    name: 'gp_run_pipeline',
+    description: 'Executes the entire GrowthPilot lead generation campaign pipeline end-to-end for a given user goal.',
     inputSchema: z.object({
       goal: z.string().describe('The campaign goal, e.g. "Find SaaS companies in Bangalore with 20-100 employees"')
     })
   })
   async runCampaign(input: { goal: string }, ctx: ExecutionContext) {
+    const startTime = Date.now();
     ctx.logger.info(`Starting campaign for goal: "${input.goal}"`);
 
-    // 1. Planner
-    const campaign = await this.planner.plan(input.goal);
-    ctx.logger.info(`Campaign planned with ID: ${campaign.id}`);
+    try {
+      // 1. Planner
+      const campaign = await this.planner.plan(input.goal);
+      ctx.logger.info(`Campaign planned with ID: ${campaign.id}`);
 
-    // 2. Discovery
-    const companies = await this.discovery.discover(campaign);
-    ctx.logger.info(`Discovered ${companies.length} companies`);
+      // 2. Discovery
+      const companies = await this.discovery.discover(campaign);
+      ctx.logger.info(`Discovered ${companies.length} companies`);
 
-    const researchList: ResearchResult[] = [];
-    const scores: QualificationScore[] = [];
-    const drafts: Draft[] = [];
-    const critiques: Critique[] = [];
+      const researchList: ResearchResult[] = [];
+      const scores: QualificationScore[] = [];
+      const drafts: Draft[] = [];
+      const critiques: Critique[] = [];
 
-    // Loop through discovered companies
-    for (const company of companies) {
-      // 3. Research
-      const research = await this.research.research(company);
-      researchList.push(research);
+      // Loop through discovered companies
+      for (const company of companies) {
+        // 3. Research
+        const research = await this.research.research(company);
+        researchList.push(research);
 
-      // 4. Qualification
-      const score = await this.qualification.qualify(company, research, campaign);
-      scores.push(score);
+        // 4. Qualification
+        const score = await this.qualification.qualify(company, research, campaign);
+        scores.push(score);
 
-      // 5. Draft
-      let draft = await this.draft.generateDraft(company, research, score, campaign.goal, campaign.id);
+        // 5. Draft
+        let draft = await this.draft.generateDraft(company, research, score, campaign.goal, campaign.id);
 
-      // 6. Critic / Review
-      const researchTime = research.normalized?.timestamp?.value || new Date().toISOString();
-      let critique = await this.critic.critique(draft, campaign.id, researchTime);
-      
-      // If score is below threshold (e.g. < 0.8), revise once
-      if (critique.score < 0.8) {
-        ctx.logger.info(`Draft for ${company.name} scored ${critique.score}. Revising...`);
-        draft = await this.critic.revise(draft, critique);
-        // Re-evaluate the revised draft
-        critique = await this.critic.critique(draft, campaign.id, researchTime);
+        // 6. Critic / Review
+        const researchTime = research.normalized?.timestamp?.value || new Date().toISOString();
+        let critique = await this.critic.critique(draft, campaign.id, researchTime);
+        
+        // If score is below threshold (e.g. < 0.8), revise once
+        if (critique.score < 0.8) {
+          ctx.logger.info(`Draft for ${company.name} scored ${critique.score}. Revising...`);
+          draft = await this.critic.revise(draft, critique);
+          // Re-evaluate the revised draft
+          critique = await this.critic.critique(draft, campaign.id, researchTime);
+        }
+
+        drafts.push(draft);
+        critiques.push(critique);
       }
 
-      drafts.push(draft);
-      critiques.push(critique);
+      const duration = Date.now() - startTime;
+      return {
+        success: true,
+        campaign,
+        companies,
+        research: researchList,
+        scores,
+        drafts,
+        critiques,
+        metadata: {
+          executionTimeMs: duration
+        }
+      };
+    } catch (error: any) {
+      ctx.logger.error(`Campaign execution failed: ${error.message || error}`);
+      return {
+        success: false,
+        error: error.message || String(error)
+      };
     }
-
-    return {
-      campaign,
-      companies,
-      research: researchList,
-      scores,
-      drafts,
-      critiques
-    };
   }
 }

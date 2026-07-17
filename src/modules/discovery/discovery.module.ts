@@ -2,6 +2,7 @@ import { Module } from '@nitrostack/core';
 import { DiscoveryService } from './discovery.service.js';
 import { GooglePlacesProvider } from './providers/google-places.provider.js';
 import { MockProvider } from './providers/mock.provider.js';
+import { DiscoveryTools } from './discovery.tools.js';
 
 @Module({
   name: 'discovery',
@@ -11,6 +12,7 @@ import { MockProvider } from './providers/mock.provider.js';
     GooglePlacesProvider,
     MockProvider
   ],
+  controllers: [DiscoveryTools],
   exports: [
     DiscoveryService,
     GooglePlacesProvider,

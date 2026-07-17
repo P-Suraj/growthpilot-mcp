@@ -3,6 +3,7 @@ import { DraftService } from './draft.service.js';
 import { LLMDraftProvider } from './providers/llm.provider.js';
 import { MockDraftProvider } from './providers/mock.provider.js';
 import { AIModule } from '../../core/ai/ai.module.js';
+import { DraftTools } from './draft.tools.js';
 
 @Module({
   name: 'draft',
@@ -13,6 +14,7 @@ import { AIModule } from '../../core/ai/ai.module.js';
     LLMDraftProvider,
     MockDraftProvider
   ],
+  controllers: [DraftTools],
   exports: [
     DraftService,
     LLMDraftProvider,
