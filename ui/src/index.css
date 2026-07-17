@@ -1,0 +1,136 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#030712] text-gray-300 antialiased selection:bg-brand-500/30 selection:text-white font-sans overflow-x-hidden;
+    background-color: #030712;
+  }
+
+  /* Custom Scrollbar for sleek UI */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.16);
+  }
+}
+
+/* Glassmorphism custom components */
+.glass-panel {
+  background: rgba(17, 24, 39, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-hover {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-panel-hover:hover {
+  border-color: rgba(139, 92, 246, 0.3);
+  background: rgba(17, 24, 39, 0.8);
+  box-shadow: 0 15px 35px -10px rgba(139, 92, 246, 0.2);
+}
+
+/* Glowing text and buttons */
+.text-glow {
+  text-shadow: 0 0 15px rgba(139, 92, 246, 0.35);
+}
+
+/* Animated Grid Background with Drift */
+.grid-bg {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: grid-slide 60s linear infinite;
+}
+
+@keyframes grid-slide {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 100px 100px;
+  }
+}
+
+/* Shimmer Loading Effect */
+.shimmer-bg {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-swipe 2s infinite linear;
+}
+
+@keyframes shimmer-swipe {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Fluid Moving Blurs */
+.mesh-gradient {
+  animation: mesh-rotate 25s infinite alternate ease-in-out;
+}
+
+@keyframes mesh-rotate {
+  0% {
+    transform: translate(0px, 0px) scale(1) rotate(0deg);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1) rotate(120deg);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.95) rotate(240deg);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1) rotate(360deg);
+  }
+}
+
+/* Breathing Border for Command Bar */
+.glow-border {
+  position: relative;
+}
+.glow-border::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2), rgba(139, 92, 246, 0.2));
+  background-size: 200% 100%;
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0.8;
+  animation: shimmer-swipe 4s infinite linear;
+}
+
+/* Obsidian Vault Dark Radial Center Masking */
+.obsidian-vault {
+  background-color: #030303;
+  background-image: radial-gradient(
+    circle at 50% 50%, 
+    rgba(15, 12, 30, 0.4) 0%, 
+    rgba(3, 3, 3, 1) 75%
+  );
+}
+
