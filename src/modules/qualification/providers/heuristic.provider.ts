@@ -9,34 +9,90 @@ export class HeuristicProvider extends QualificationProvider {
   async qualify(company: Company, research: ResearchResult, campaign: Campaign): Promise<QualificationScore> {
     let score = 0.5;
     const reasons: string[] = [];
+    const spec = campaign.searchSpec;
 
-    // Industry check
-    if (campaign.targetIndustry && company.industry.toLowerCase() === campaign.targetIndustry.toLowerCase()) {
-      score += 0.2;
-      reasons.push(`Industry matches target: ${campaign.targetIndustry}`);
-    } else {
-      score -= 0.1;
-      reasons.push(`Industry (${company.industry}) does not match target (${campaign.targetIndustry})`);
-    }
+    // ------------------------------------------------------------------
+    // Industry / category match
+    // ------------------------------------------------------------------
+    const companyTypes: string[] = company.categories ?? [];
+    const expectedPlaceType = spec?.googlePlaceType ?? '';
+    const expectedIndustry = (spec?.industry ?? campaign.targetIndustry ?? '').toLowerCase();
+    const companyIndustryLower = company.industry.toLowerCase();
 
-    // Location check
-    if (campaign.targetLocation && company.location.toLowerCase() === campaign.targetLocation.toLowerCase()) {
+    // Check 1: exact placeType match in Google types array (most reliable)
+    const exactTypeMatch = expectedPlaceType && companyTypes.includes(expectedPlaceType);
+
+    // Check 2: industry string match (now uses real Google category, not copied value)
+    const industryMatch =
+      expectedIndustry &&
+      (companyIndustryLower.includes(expectedIndustry) || expectedIndustry.includes(companyIndustryLower));
+
+    // Check 3: partial category overlap — any types containing store/tech/electronics etc.
+    const broadMatch = expectedPlaceType
+      ? companyTypes.some(t =>
+          t.includes('store') ||
+          t.includes('shop') ||
+          t.includes('dealer') ||
+          t.includes('tech') ||
+          t.includes('electronic')
+        )
+      : false;
+
+    if (exactTypeMatch) {
+      score += 0.25;
+      reasons.push(`Google place type exactly matches expected type: "${expectedPlaceType}"`);
+    } else if (industryMatch) {
       score += 0.15;
-      reasons.push(`Location matches target: ${campaign.targetLocation}`);
+      reasons.push(`Industry "${company.industry}" aligns with target "${spec?.industry ?? campaign.targetIndustry}"`);
+    } else if (broadMatch) {
+      score += 0.05;
+      reasons.push(`Company has a broadly relevant Google category`);
     } else {
-      score -= 0.05;
-      reasons.push(`Location (${company.location}) does not match target (${campaign.targetLocation})`);
+      score -= 0.15;
+      reasons.push(
+        `Industry/type mismatch — Google types: [${companyTypes.slice(0, 3).join(', ')}], expected: "${expectedPlaceType || expectedIndustry}"`
+      );
     }
 
-    // Employee count check
+    // ------------------------------------------------------------------
+    // Location match
+    // ------------------------------------------------------------------
+    const expectedLocation = (spec?.city ?? campaign.targetLocation ?? '').toLowerCase();
+    if (expectedLocation && company.location.toLowerCase().includes(expectedLocation)) {
+      score += 0.1;
+      reasons.push(`Location "${company.location}" matches target "${spec?.city ?? campaign.targetLocation}"`);
+    } else if (expectedLocation) {
+      score -= 0.05;
+      reasons.push(`Location "${company.location}" does not match target "${spec?.city ?? campaign.targetLocation}"`);
+    }
+
+    // ------------------------------------------------------------------
+    // Employee count
+    // ------------------------------------------------------------------
     const minEmp = campaign.minEmployees ?? 0;
     const maxEmp = campaign.maxEmployees ?? 1000;
     if (company.employeeCount >= minEmp && company.employeeCount <= maxEmp) {
-      score += 0.15;
-      reasons.push(`Employee count (${company.employeeCount}) is in range [${minEmp}, ${maxEmp}]`);
+      score += 0.1;
+      reasons.push(`Employee count (${company.employeeCount}) is within range [${minEmp}, ${maxEmp}]`);
     } else {
-      score -= 0.2;
+      score -= 0.1;
       reasons.push(`Employee count (${company.employeeCount}) is outside range [${minEmp}, ${maxEmp}]`);
+    }
+
+    // ------------------------------------------------------------------
+    // Rating signal (positive only — a good rating boosts; absence is neutral)
+    // ------------------------------------------------------------------
+    if (company.rating !== null && company.rating !== undefined && company.rating >= 4.0) {
+      score += 0.05;
+      reasons.push(`Strong rating: ${company.rating}`);
+    }
+
+    // ------------------------------------------------------------------
+    // Website presence (positive signal for B2B leads)
+    // ------------------------------------------------------------------
+    if (research.website && research.website.length > 0) {
+      score += 0.05;
+      reasons.push(`Business has a website: ${research.website}`);
     }
 
     score = Math.max(0, Math.min(1, score));
@@ -44,13 +100,13 @@ export class HeuristicProvider extends QualificationProvider {
     let tier: 'High' | 'Medium' | 'Low' = 'Medium';
     if (score >= 0.75) {
       tier = 'High';
-    } else if (score < 0.4) {
+    } else if (score < 0.40) {
       tier = 'Low';
     }
 
     return {
       companyId: company.id,
-      score: parseFloat(score.toFixed(2)),
+      score:     parseFloat(score.toFixed(2)),
       tier,
       reasoning: reasons.join('; '),
     };

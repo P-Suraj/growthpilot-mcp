@@ -36,3 +36,5 @@ build/
 .env*.local
 ui/.env
 ui/.env*.local
+
+.vercel

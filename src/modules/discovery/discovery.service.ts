@@ -22,7 +22,9 @@ export class DiscoveryService {
     const minEmp = campaign.minEmployees ?? 0;
     const maxEmp = campaign.maxEmployees ?? 1000;
 
-    const cacheKey = `${industry.toLowerCase()}_${location.toLowerCase()}_${minEmp}-${maxEmp}`;
+    // Include searchSpec product in cache key so different products in same location don't collide
+    const product = campaign.searchSpec?.product?.toLowerCase() || 'generic';
+    const cacheKey = `${product}_${industry.toLowerCase()}_${location.toLowerCase()}_${minEmp}-${maxEmp}`;
     const now = Date.now();
 
     // 1. Check Cache
@@ -85,6 +87,23 @@ export class DiscoveryService {
     } catch (error: any) {
       console.error(`[Discovery Error] Google Places Provider failed: ${error.message}. Falling back to MockProvider.`);
       companies = await this.mockProvider.discover(campaign);
+    }
+
+    // Apply reject-keyword filter (deterministic, zero API calls)
+    const rejectKeywords = campaign.searchSpec?.rejectKeywords ?? [];
+    if (rejectKeywords.length > 0) {
+      const before = companies.length;
+      companies = companies.filter(c => {
+        const nameLower = c.name.toLowerCase();
+        const rejected = rejectKeywords.some(kw => nameLower.includes(kw.toLowerCase()));
+        if (rejected) {
+          console.log(`[Discovery] Rejected by keyword filter: "${c.name}" (matched reject keyword)`);
+        }
+        return !rejected;
+      });
+      if (companies.length < before) {
+        console.log(`[Discovery] Keyword filter removed ${before - companies.length} companies. Remaining: ${companies.length}`);
+      }
     }
 
     // Slice to maximum of 10 companies
