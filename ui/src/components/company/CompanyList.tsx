@@ -8,9 +8,11 @@ interface CompanyListProps {
   scores: Record<string, QualificationScore>;
   activeId: string | null;
   onSelect: (id: string) => void;
+  /** Only show qualification scores after qualification stage finishes */
+  showScores?: boolean;
 }
 
-export const CompanyList: React.FC<CompanyListProps> = ({ companies, scores, activeId, onSelect }) => {
+export const CompanyList: React.FC<CompanyListProps> = ({ companies, scores, activeId, onSelect, showScores = true }) => {
   if (companies.length === 0) {
     return (
       <div className="space-y-3">
@@ -81,9 +83,9 @@ export const CompanyList: React.FC<CompanyListProps> = ({ companies, scores, act
               </div>
             </div>
 
-            {/* Score & Tier indicator */}
+            {/* Score & Tier indicator — gated by showScores prop */}
             <div className="flex items-center gap-3">
-              {qual ? (
+              {showScores && qual ? (
                 <div className="flex items-center gap-2">
                   <div className="text-right">
                     <div className="text-sm font-bold font-mono text-white flex items-center gap-1 justify-end">
@@ -104,11 +106,13 @@ export const CompanyList: React.FC<CompanyListProps> = ({ companies, scores, act
                     <div className="w-5 h-5 rounded-full border border-gray-700" />
                   )}
                 </div>
-              ) : (
+              ) : showScores && !qual ? (
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-600 animate-pulse">Running AI Scorer...</span>
+                  <span className="text-xs text-gray-600 animate-pulse">Scoring…</span>
                   <div className="w-4 h-4 rounded-full border-2 border-gray-800 border-t-brand-500 animate-spin" />
                 </div>
+              ) : (
+                <span className="text-[10px] text-gray-600 font-mono">Pending</span>
               )}
             </div>
           </motion.div>

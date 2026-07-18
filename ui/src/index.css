@@ -10,28 +10,21 @@
     background-color: #030712;
   }
 
-  /* Custom Scrollbar for sleek UI */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.08);
     border-radius: 9999px;
   }
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.16);
-  }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.16); }
 }
 
-/* Glassmorphism custom components */
+/* ─── Glassmorphism ────────────────────────────────────────────────────────── */
 .glass-panel {
-  background: rgba(17, 24, 39, 0.6);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(17, 24, 39, 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -44,35 +37,31 @@
   box-shadow: 0 15px 35px -10px rgba(139, 92, 246, 0.2);
 }
 
-/* Glowing text and buttons */
+/* ─── Glow text ────────────────────────────────────────────────────────────── */
 .text-glow {
-  text-shadow: 0 0 15px rgba(139, 92, 246, 0.35);
+  text-shadow: 0 0 20px rgba(139, 92, 246, 0.45);
 }
 
-/* Animated Grid Background with Drift */
+/* ─── Animated Grid (subtle) ───────────────────────────────────────────────── */
 .grid-bg {
-  background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 50px 50px;
-  animation: grid-slide 60s linear infinite;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 52px 52px;
+  animation: grid-slide 80s linear infinite;
 }
 
 @keyframes grid-slide {
-  from {
-    background-position: 0 0;
-  }
-  to {
-    background-position: 100px 100px;
-  }
+  from { background-position: 0 0; }
+  to   { background-position: 104px 104px; }
 }
 
-/* Shimmer Loading Effect */
+/* ─── Shimmer Loading ──────────────────────────────────────────────────────── */
 .shimmer-bg {
   background: linear-gradient(
     90deg,
     rgba(255, 255, 255, 0.03) 25%,
-    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.09) 50%,
     rgba(255, 255, 255, 0.03) 75%
   );
   background-size: 200% 100%;
@@ -80,57 +69,75 @@
 }
 
 @keyframes shimmer-swipe {
-  from {
-    background-position: 200% 0;
-  }
-  to {
-    background-position: -200% 0;
-  }
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
 }
 
-/* Fluid Moving Blurs */
+/* ─── Floating Ambient Orbs ────────────────────────────────────────────────── */
 .mesh-gradient {
-  animation: mesh-rotate 25s infinite alternate ease-in-out;
+  animation: mesh-float 22s infinite alternate ease-in-out;
 }
 
-@keyframes mesh-rotate {
-  0% {
-    transform: translate(0px, 0px) scale(1) rotate(0deg);
-  }
-  33% {
-    transform: translate(30px, -50px) scale(1.1) rotate(120deg);
-  }
-  66% {
-    transform: translate(-20px, 20px) scale(0.95) rotate(240deg);
-  }
-  100% {
-    transform: translate(0px, 0px) scale(1) rotate(360deg);
-  }
+@keyframes mesh-float {
+  0%   { transform: translate(0px,   0px) scale(1)    rotate(0deg);   }
+  25%  { transform: translate(35px, -55px) scale(1.08) rotate(90deg);  }
+  50%  { transform: translate(-25px, 25px) scale(0.96) rotate(180deg); }
+  75%  { transform: translate(20px,  40px) scale(1.05) rotate(270deg); }
+  100% { transform: translate(0px,   0px) scale(1)    rotate(360deg); }
 }
 
-/* Breathing Border for Command Bar */
+/* ─── Breathing Glow Border ────────────────────────────────────────────────── */
 .glow-border {
   position: relative;
 }
-.glow-border::after {
+.glow-border::before {
   content: '';
   position: absolute;
   inset: -1px;
-  background: linear-gradient(90deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2), rgba(139, 92, 246, 0.2));
-  background-size: 200% 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(139, 92, 246, 0.35),
+    rgba(99, 102, 241, 0.25),
+    rgba(236, 72, 153, 0.30),
+    rgba(139, 92, 246, 0.35)
+  );
+  background-size: 300% 100%;
   border-radius: inherit;
   z-index: -1;
-  opacity: 0.8;
-  animation: shimmer-swipe 4s infinite linear;
+  animation: glow-sweep 5s ease-in-out infinite;
+  opacity: 0.75;
 }
 
-/* Obsidian Vault Dark Radial Center Masking */
+@keyframes glow-sweep {
+  0%   { background-position: 0%   50%; opacity: 0.6; }
+  50%  { background-position: 100% 50%; opacity: 1.0; }
+  100% { background-position: 0%   50%; opacity: 0.6; }
+}
+
+/* ─── Obsidian Deep Background ─────────────────────────────────────────────── */
 .obsidian-vault {
-  background-color: #030303;
-  background-image: radial-gradient(
-    circle at 50% 50%, 
-    rgba(15, 12, 30, 0.4) 0%, 
-    rgba(3, 3, 3, 1) 75%
-  );
+  background-color: #050508;
+  background-image:
+    radial-gradient(ellipse at 30% 20%, rgba(76, 29, 149, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 80%, rgba(131, 24, 67, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse at 50% 50%, rgba(15, 12, 40, 0.5)  0%, rgba(5, 5, 8, 1) 80%);
 }
 
+/* ─── Floating Particle Dots (pure CSS) ────────────────────────────────────── */
+.particle-field::before,
+.particle-field::after {
+  content: '';
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(139, 92, 246, 0.6);
+  animation: particle-drift 8s ease-in-out infinite;
+}
+.particle-field::before { top: 25%; left: 15%; animation-delay: 0s;   }
+.particle-field::after  { top: 65%; left: 80%; animation-delay: -4s;  }
+
+@keyframes particle-drift {
+  0%, 100% { transform: translateY(0px)   scale(1);   opacity: 0.5; }
+  50%       { transform: translateY(-30px) scale(1.5); opacity: 1;   }
+}
