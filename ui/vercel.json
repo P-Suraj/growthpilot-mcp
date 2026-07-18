@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/sse",
+      "destination": "https://growthpilot-6a5af3-hyd-bros-amrita-university-amritapuri-campus.app.nitrocloud.ai/sse"
+    },
+    {
+      "source": "/mcp/:path*",
+      "destination": "https://growthpilot-6a5af3-hyd-bros-amrita-university-amritapuri-campus.app.nitrocloud.ai/mcp/:path*"
+    }
+  ]
+}
