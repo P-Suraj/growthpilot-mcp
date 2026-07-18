@@ -106,8 +106,8 @@ export class DiscoveryService {
       }
     }
 
-    // Slice to maximum of 10 companies
-    const slicedCompanies = companies.slice(0, 10);
+    // Slice to maximum of 3 companies to prevent API rate-limit bottlenecks
+    const slicedCompanies = companies.slice(0, 3);
 
     // 5. Cache the result
     this.cache.set(cacheKey, {
