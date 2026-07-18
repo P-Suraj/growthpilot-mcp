@@ -259,6 +259,7 @@ export function useCampaign() {
         const d = STAGE_DURATIONS_MS;
 
         t(d.discovery, () => {
+          if (stateRef.current.phase !== 'running') return;
           completeStage('discovery');
           setState(prev => ({
             ...prev, status: 'enriching',
@@ -270,6 +271,7 @@ export function useCampaign() {
         });
 
         t(d.discovery + d.research, () => {
+          if (stateRef.current.phase !== 'running') return;
           completeStage('research');
           setState(prev => ({
             ...prev, status: 'qualifying',
@@ -281,6 +283,7 @@ export function useCampaign() {
         });
 
         t(d.discovery + d.research + d.qualification, () => {
+          if (stateRef.current.phase !== 'running') return;
           completeStage('qualification');
           setState(prev => ({
             ...prev, status: 'drafting',
@@ -292,6 +295,7 @@ export function useCampaign() {
         });
 
         t(d.discovery + d.research + d.qualification + d.draft, () => {
+          if (stateRef.current.phase !== 'running') return;
           completeStage('draft');
           setState(prev => ({
             ...prev, status: 'reviewing',
