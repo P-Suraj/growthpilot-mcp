@@ -1,8 +1,11 @@
 /**
- * Calculator MCP Server
+ * GrowthPilot MCP Server
  * 
- * Main entry point for the MCP server.
- * Uses the @McpApp decorator pattern for clean, NestJS-style architecture.
+ * AI-powered B2B outbound sales automation pipeline exposed as an MCP server.
+ * Orchestrates a 7-stage workflow: Plan → Discover → Validate → Research → Qualify → Draft → Critique.
+ * 
+ * Integrates Google Places API (discovery), Tavily API (research), and Gemini 1.5 Flash (reasoning).
+ * Uses the @McpApp decorator pattern for clean, NestJS-style modular architecture.
  * 
  * Transport Configuration:
  * - Development (NODE_ENV=development): STDIO only

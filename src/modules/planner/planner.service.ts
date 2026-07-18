@@ -66,7 +66,7 @@ const PRODUCT_TO_PLACE_TYPE: Array<{
 // ---------------------------------------------------------------------------
 // Location extraction — handles "near", "in", "around", "close to"
 // ---------------------------------------------------------------------------
-function extractLocation(goal: string): { city: string; state: string } {
+export function extractLocation(goal: string): { city: string; state: string } {
   // Patterns: "near X", "in X", "around X", "close to X", "at X"
   const patterns = [
     /(?:near|in|around|at|close\s+to)\s+([A-Za-z\s]+?)(?:\s*,\s*([A-Za-z\s]+?))?(?:\s+with|\s+having|\s+for|$)/i,
@@ -87,7 +87,7 @@ function extractLocation(goal: string): { city: string; state: string } {
 // ---------------------------------------------------------------------------
 // Employee range extraction
 // ---------------------------------------------------------------------------
-function extractEmployeeRange(goal: string): { min: number; max: number } {
+export function extractEmployeeRange(goal: string): { min: number; max: number } {
   const rangeMatch = goal.match(/(\d+)\s*(?:-|to)\s*(\d+)\s+employees/i);
   if (rangeMatch) return { min: parseInt(rangeMatch[1], 10), max: parseInt(rangeMatch[2], 10) };
 

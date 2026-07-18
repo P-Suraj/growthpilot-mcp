@@ -1,4 +1,4 @@
-import { ControllerDecorator as Controller, ToolDecorator as Tool, ExecutionContext, z } from '@nitrostack/core';
+import { ControllerDecorator as Controller, ToolDecorator as Tool, ResourceDecorator as Resource, PromptDecorator as Prompt, ExecutionContext, z } from '@nitrostack/core';
 import { PlannerService } from '../planner/planner.service.js';
 import { DiscoveryService } from '../discovery/discovery.service.js';
 import { BusinessValidatorService } from '../discovery/providers/business-validator.service.js';
@@ -112,10 +112,17 @@ export class CampaignController {
         const researchTime = research.normalized?.timestamp?.value || new Date().toISOString();
         let critique = await this.critic.critique(draft, campaign.id, researchTime);
 
-        if (critique.score < 0.8) {
-          ctx.logger.info(`Draft for "${company.name}" scored ${critique.score}. Revising...`);
+        let revisionCount = 0;
+        const maxRevisions = 3;
+        while (critique.score < 0.8 && revisionCount < maxRevisions) {
+          ctx.logger.info(`Draft for "${company.name}" scored ${critique.score}. Revising (Attempt ${revisionCount + 1}/${maxRevisions})...`);
           draft = await this.critic.revise(draft, critique);
           critique = await this.critic.critique(draft, campaign.id, researchTime);
+          revisionCount++;
+        }
+
+        if (critique.score < 0.8) {
+          ctx.logger.warn(`Draft for "${company.name}" failed to reach 0.8 score after ${maxRevisions} revisions. Final score: ${critique.score}`);
         }
 
         drafts.push(draft);
@@ -155,5 +162,47 @@ export class CampaignController {
         error: error.message || String(error),
       };
     }
+  }
+
+  @Resource({
+    uri: 'growthpilot://system/status',
+    name: 'System Status',
+    description: 'Get the current status of the GrowthPilot system and active providers.'
+  })
+  async getSystemStatus(ctx: ExecutionContext) {
+    return {
+      status: 'ready',
+      version: '1.0.0',
+      activeProviders: {
+        discovery: 'Google Places',
+        research: 'Tavily',
+        ai: 'Gemini 1.5 Flash'
+      }
+    };
+  }
+
+  @Prompt({
+    name: 'gp_campaign_brainstorm',
+    description: 'Brainstorm campaign goals for a specific industry',
+    arguments: [
+      {
+        name: 'industry',
+        description: 'The target industry (e.g. SaaS, Manufacturing)',
+        required: true
+      }
+    ]
+  })
+  async getBrainstormPrompt(args: { industry: string }, ctx: ExecutionContext) {
+    return {
+      messages: [
+        {
+          role: 'user',
+          content: {
+            type: 'text',
+            text: `I want to run a B2B outbound campaign targeting the ${args.industry} industry. Can you suggest 3 specific, actionable campaign goals formatted like "Find [product/service] companies in [location] with [size] employees"?`
+          }
+        }
+      ]
+    };
   }
 }
